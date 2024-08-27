@@ -26,18 +26,20 @@ class Ship:
         self.decks = self.create_decs(start, end)
         self.is_drowned = is_drowned
 
-    def get_deck(self, row: int, column: int) -> Deck | None:
-        deck = [
+    def get_deck(self, row: int, column: int) -> Deck:
+        return [
             deck for deck in self.decks
             if deck.row == row and deck.column == column
-        ]
-        return deck[0] if deck else None
+        ][0]
 
     def fire(self, row: int, column: int) -> str:
         if self.is_drowned:
             return "The ship in this location already drowned"
 
         deck = self.get_deck(row, column)
+        if deck.is_alive is False:
+            return "The deck has already been struck"
+
         deck.is_alive = False
         deck.symbol = "*"
         return "Sunk!" if self.if_all_deck_is_damaged() else "Hit!"
@@ -68,7 +70,7 @@ class Ship:
 
     @classmethod
     def create_ship(cls, ship_cords: tuple) -> Ship:
-        return Ship(*ship_cords)
+        return cls(*ship_cords)
 
 
 class Battleship:
@@ -115,8 +117,8 @@ class Battleship:
     def get_symbol_from_cell(cords: tuple[int, int], cell: Cell | Ship) -> str:
         if isinstance(cell, Ship):
             return cell.get_deck(cords[0], cords[1]).symbol
-        else:
-            return cell.symbol
+
+        return cell.symbol
 
     @staticmethod
     def create_empty_field() -> dict[tuple[int, int], Cell]:
